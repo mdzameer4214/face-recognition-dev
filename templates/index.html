@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Face Dashboard</title>
+
+    <style>
+        body { background:#0f172a; color:white; font-family:Arial; padding:20px; }
+        h1 { text-align:center; }
+
+        table { width:100%; border-collapse:collapse; background:white; color:black; margin-top:10px; }
+        th { background:#38bdf8; padding:10px; }
+        td { border:1px solid #ddd; padding:8px; text-align:center; }
+
+        img { width:120px; border-radius:10px; }
+    </style>
+</head>
+
+<body>
+
+<h1>FACE RECOGNITION DASHBOARD</h1>
+
+<h3>Time: {{ current_time }}</h3>
+
+<h2>Attendance (Final Entry Only)</h2>
+<table>
+<tr>
+<th>ID</th><th>Name</th><th>Date</th><th>First IN</th><th>Last OUT</th>
+</tr>
+
+{% for r in attendance %}
+<tr>
+<td>{{ r.id }}</td>
+<td>{{ r.name }}</td>
+<td>{{ r.date }}</td>
+<td>{{ r.first_in }}</td>
+<td>{{ r.last_out }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Movement (IN / OUT Logs)</h2>
+<table>
+<tr>
+<th>ID</th><th>Name</th><th>Date</th><th>Time</th><th>Event</th>
+</tr>
+
+{% for r in movements %}
+<tr>
+<td>{{ r.id }}</td>
+<td>{{ r.name }}</td>
+<td>{{ r.date }}</td>
+<td>{{ r.time }}</td>
+<td>{{ r.event }}</td>
+</tr>
+{% endfor %}
+</table>
+
+<h2>Unknown People</h2>
+<table>
+<tr>
+<th>ID</th><th>Image</th><th>Date</th><th>Time</th>
+</tr>
+
+{% for r in unknowns %}
+<tr>
+<td>{{ r.id }}</td>
+<td><img src="/{{ r.image_path }}"></td>
+<td>{{ r.date }}</td>
+<td>{{ r.time }}</td>
+</tr>
+{% endfor %}
+</table>
+
+</body>
+</html>
