@@ -54,6 +54,20 @@
             color:#38bdf8;
         }
 
+        .camera-section{
+            margin-bottom:30px;
+        }
+
+        .camera-section h2{
+            margin-bottom:15px;
+        }
+
+        .camera-feed{
+            width:700px;
+            border-radius:15px;
+            border:4px solid #38bdf8;
+        }
+
         table{
             width:100%;
             border-collapse:collapse;
@@ -85,22 +99,46 @@
 <body>
 
     <div class="header">
-        <h1>Enterprise Face Recognition Dashboard</h1>
+
+        <h1>
+            Enterprise Face Recognition Dashboard
+        </h1>
+
     </div>
+
 
     <div class="cards">
 
         <div class="card">
+
             <h2>Total Employees</h2>
+
             <p>{{ total }}</p>
+
         </div>
 
         <div class="card">
+
             <h2>Today's Attendance</h2>
+
             <p>{{ today }}</p>
+
         </div>
 
     </div>
+
+
+    <div class="camera-section">
+
+        <h2>Live Camera Feed</h2>
+
+        <img
+            src="/video_feed"
+            class="camera-feed"
+        >
+
+    </div>
+
 
     <table>
 
@@ -115,11 +153,13 @@
         {% for row in attendance %}
 
         <tr>
+
             <td>{{ row.id }}</td>
             <td>{{ row.name }}</td>
             <td>{{ row.date }}</td>
             <td>{{ row.first_in }}</td>
             <td>{{ row.last_out }}</td>
+
         </tr>
 
         {% endfor %}

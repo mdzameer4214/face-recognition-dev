@@ -1,18 +1,47 @@
 from flask import Blueprint
 from flask import render_template
+from flask import Response
 
 import sqlite3
+import cv2
+
 from datetime import datetime
 
 api_bp = Blueprint("api", __name__)
 
 DATABASE = "database.db"
 
+camera = cv2.VideoCapture(0)
+
+
+def generate_frames():
+
+    while True:
+
+        success, frame = camera.read()
+
+        if not success:
+            break
+
+        else:
+
+            ret, buffer = cv2.imencode(".jpg", frame)
+
+            frame = buffer.tobytes()
+
+            yield (
+                b"--frame\r\n"
+                b"Content-Type: image/jpeg\r\n\r\n" +
+                frame +
+                b"\r\n"
+            )
+
 
 @api_bp.route("/")
 def dashboard():
 
     conn = sqlite3.connect(DATABASE)
+
     conn.row_factory = sqlite3.Row
 
     cursor = conn.cursor()
@@ -63,6 +92,7 @@ def health():
 def attendance_api():
 
     conn = sqlite3.connect(DATABASE)
+
     conn.row_factory = sqlite3.Row
 
     cursor = conn.cursor()
@@ -92,3 +122,12 @@ def attendance_api():
     return {
         "attendance": data
     }
+
+
+@api_bp.route("/video_feed")
+def video_feed():
+
+    return Response(
+        generate_frames(),
+        mimetype="multipart/x-mixed-replace; boundary=frame"
+    )
