@@ -1,6 +1,7 @@
 from flask import Blueprint
 from flask import render_template
 from flask import Response
+from flask import jsonify
 
 import sqlite3
 import cv2
@@ -16,6 +17,10 @@ DATABASE = "database.db"
 
 camera = cv2.VideoCapture(0)
 
+last_seen = {}
+
+ATTENDANCE_DELAY = 30
+
 print("[AI] Loading encodings...")
 
 with open("encodings/face_encodings.pkl", "rb") as f:
@@ -23,6 +28,64 @@ with open("encodings/face_encodings.pkl", "rb") as f:
     data = pickle.load(f)
 
 print("[AI] Encodings loaded")
+
+
+def mark_attendance(name):
+
+    conn = sqlite3.connect(DATABASE)
+
+    cursor = conn.cursor()
+
+    today = datetime.now().strftime("%Y-%m-%d")
+
+    current_time = datetime.now().strftime("%H:%M:%S")
+
+    cursor.execute("""
+        SELECT * FROM attendance
+        WHERE name=? AND date=?
+    """, (name, today))
+
+    result = cursor.fetchone()
+
+    if result is None:
+
+        cursor.execute("""
+            INSERT INTO attendance
+            (
+                employee_id,
+                name,
+                date,
+                first_in,
+                last_out
+            )
+            VALUES (?, ?, ?, ?, ?)
+        """, (
+            name,
+            name,
+            today,
+            current_time,
+            current_time
+        ))
+
+        print(f"[IN] {name}")
+
+    else:
+
+        cursor.execute("""
+            UPDATE attendance
+            SET last_out=?
+            WHERE name=? AND date=?
+        """, (
+            current_time,
+            name,
+            today
+        ))
+
+        print(f"[OUT] {name}")
+
+    conn.commit()
+
+    conn.close()
 
 
 def generate_frames():
@@ -93,6 +156,25 @@ def generate_frames():
                     name = data["names"][best_match_index]
 
                     color = (0, 255, 0)
+
+                    if name not in last_seen:
+
+                        mark_attendance(name)
+
+                        last_seen[name] = datetime.now()
+
+                    else:
+
+                        seconds = (
+                            datetime.now() -
+                            last_seen[name]
+                        ).seconds
+
+                        if seconds > ATTENDANCE_DELAY:
+
+                            mark_attendance(name)
+
+                            last_seen[name] = datetime.now()
 
             top, right, bottom, left = face_location
 
@@ -226,9 +308,7 @@ def attendance_api():
             "last_out": row["last_out"]
         })
 
-    return {
-        "attendance": data
-    }
+    return jsonify(data)
 
 
 @api_bp.route("/video_feed")

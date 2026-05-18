@@ -40,29 +40,23 @@
             padding:20px;
             border-radius:15px;
             width:250px;
-            box-shadow:0 0 10px rgba(0,0,0,0.3);
         }
 
         .card h2{
-            font-size:18px;
             margin-bottom:10px;
         }
 
         .card p{
             font-size:30px;
-            font-weight:bold;
             color:#38bdf8;
+            font-weight:bold;
         }
 
-        .camera-section{
+        .camera{
             margin-bottom:30px;
         }
 
-        .camera-section h2{
-            margin-bottom:15px;
-        }
-
-        .camera-feed{
+        .camera img{
             width:700px;
             border-radius:15px;
             border:4px solid #38bdf8;
@@ -88,10 +82,6 @@
             text-align:center;
         }
 
-        tr:hover{
-            background:#f1f5f9;
-        }
-
     </style>
 
 </head>
@@ -113,7 +103,9 @@
 
             <h2>Total Employees</h2>
 
-            <p>{{ total }}</p>
+            <p id="total-count">
+                {{ total }}
+            </p>
 
         </div>
 
@@ -121,50 +113,103 @@
 
             <h2>Today's Attendance</h2>
 
-            <p>{{ today }}</p>
+            <p id="today-count">
+                {{ today }}
+            </p>
 
         </div>
 
     </div>
 
 
-    <div class="camera-section">
+    <div class="camera">
 
-        <h2>Live Camera Feed</h2>
+        <h2 style="margin-bottom:15px;">
+            Live AI Camera
+        </h2>
 
-        <img
-            src="/video_feed"
-            class="camera-feed"
-        >
+        <img src="/video_feed">
 
     </div>
 
 
     <table>
 
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Date</th>
-            <th>First IN</th>
-            <th>Last OUT</th>
-        </tr>
+        <thead>
 
-        {% for row in attendance %}
+            <tr>
 
-        <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Date</th>
+                <th>First IN</th>
+                <th>Last OUT</th>
 
-            <td>{{ row.id }}</td>
-            <td>{{ row.name }}</td>
-            <td>{{ row.date }}</td>
-            <td>{{ row.first_in }}</td>
-            <td>{{ row.last_out }}</td>
+            </tr>
 
-        </tr>
+        </thead>
 
-        {% endfor %}
+        <tbody id="attendance-body">
+
+            {% for row in attendance %}
+
+            <tr>
+
+                <td>{{ row.id }}</td>
+                <td>{{ row.name }}</td>
+                <td>{{ row.date }}</td>
+                <td>{{ row.first_in }}</td>
+                <td>{{ row.last_out }}</td>
+
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
 
     </table>
+
+
+<script>
+
+async function loadAttendance(){
+
+    const response = await fetch("/attendance")
+
+    const data = await response.json()
+
+    const table = document.getElementById(
+        "attendance-body"
+    )
+
+    table.innerHTML = ""
+
+    data.forEach(row => {
+
+        table.innerHTML += `
+
+        <tr>
+
+            <td>${row.id}</td>
+            <td>${row.name}</td>
+            <td>${row.date}</td>
+            <td>${row.first_in}</td>
+            <td>${row.last_out}</td>
+
+        </tr>
+
+        `
+
+    })
+
+}
+
+setInterval(
+    loadAttendance,
+    3000
+)
+
+</script>
 
 </body>
 </html>
